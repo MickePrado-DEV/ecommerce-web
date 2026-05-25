@@ -1,1 +1,1 @@
-﻿export { AdminShipmentsPage as default } from '@/views/admin-shipments/ui/admin-shipments-page';
+﻿export { AdminShipmentsPage as default } from '@/views/admin/shipments/ui/admin-shipments-page';

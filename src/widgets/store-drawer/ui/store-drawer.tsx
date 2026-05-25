@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { catalogApi } from '@/entities/catalog/api/catalog-api';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { useLockBodyScroll } from '@/shared/hooks/use-lock-body-scroll';
-import { getCatalogByFamily, getDefaultFamilyId } from '@/shared/lib/catalog-nav';
+import { getCatalogByFamily, getDefaultFamilyId } from '@/shared/lib/catalog/nav';
 import { SidebarNav } from '@/widgets/store-drawer/ui/sidebar-nav';
 import { CatalogPreviewPanel } from '@/widgets/store-drawer/ui/catalog-preview-panel';
 import { Button } from '@/shared/ui/button';

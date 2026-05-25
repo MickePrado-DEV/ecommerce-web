@@ -49,10 +49,35 @@ function barrelFromDir(baseDir, subdirs) {
   return lines;
 }
 
-// views
-const viewsDir = join(src, 'views');
-for (const slice of readdirSync(viewsDir)) {
-  const slicePath = join(viewsDir, slice);
+function isDir(p) {
+  return existsSync(p) && statSync(p).isDirectory();
+}
+
+function listSlices(layerDir, domains = null) {
+  const slices = [];
+  if (!existsSync(layerDir)) return slices;
+  for (const entry of readdirSync(layerDir)) {
+    const entryPath = join(layerDir, entry);
+    if (!isDir(entryPath)) continue;
+    if (domains && domains.includes(entry)) {
+      for (const slice of readdirSync(entryPath)) {
+        const slicePath = join(entryPath, slice);
+        if (isDir(slicePath)) slices.push(slicePath);
+      }
+    } else if (!domains) {
+      slices.push(entryPath);
+    }
+  }
+  return slices;
+}
+
+// views: flat slices + catalog/* + admin/*
+for (const slicePath of [
+  ...listSlices(join(src, 'views'), ['catalog', 'admin']),
+  ...listSlices(join(src, 'views')).filter(
+    (p) => !p.includes(`${join('views', 'catalog')}`) && !p.includes(`${join('views', 'admin')}`),
+  ),
+]) {
   const lines = barrelFromDir(slicePath, ['ui']);
   if (lines.length && writeIfChanged(join(slicePath, 'index.ts'), lines.join('\n') + '\n')) created++;
 }
@@ -73,10 +98,13 @@ for (const a of readdirSync(featuresDir)) {
   }
 }
 
-// widgets
-const widgetsDir = join(src, 'widgets');
-for (const slice of readdirSync(widgetsDir)) {
-  const slicePath = join(widgetsDir, slice);
+// widgets: flat + catalog/* + admin/*
+for (const slicePath of [
+  ...listSlices(join(src, 'widgets'), ['catalog', 'admin']),
+  ...listSlices(join(src, 'widgets')).filter(
+    (p) => !p.includes(`${join('widgets', 'catalog')}`) && !p.includes(`${join('widgets', 'admin')}`),
+  ),
+]) {
   const lines = [
     ...barrelFromDir(slicePath, ['ui']),
     ...barrelFromDir(slicePath, ['model']),
@@ -107,6 +135,8 @@ for (const slice of readdirSync(entitiesDir)) {
 // shared
 const sharedExports = {
   'shared/lib': ["export * from './utils';", "export * from './format-money';", "export * from './query-keys';", "export * from './order-status';"],
+  'shared/lib/catalog': ["export * from './query-state';", "export * from './nav';", "export * from './sort';"],
+  'shared/hooks/catalog': ["export * from './use-query-state';"],
   'shared/config': ["export * from './env';"],
   'shared/providers': ["export * from './app-providers';"],
   'shared/ui': [

@@ -1,5 +1,5 @@
-import { catalogApi } from '@/entities/catalog/api/catalog-api';
-import { buildProductQueryParams } from '@/shared/lib/catalog-query-state';
+﻿import { catalogApi } from '@/entities/catalog/api/catalog-api';
+import { buildProductQueryParams } from '@/shared/lib/catalog/query-state';
 import type { CatalogOptionDto } from '@/entities/catalog/model/types';
 
 export type FacetOption = {

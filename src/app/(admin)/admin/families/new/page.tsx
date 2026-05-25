@@ -1,1 +1,1 @@
-﻿export { AdminFamilyFormPage as default } from '@/views/admin-family-form/ui/admin-family-form-page';
+﻿export { AdminFamilyFormPage as default } from '@/views/admin/family-form/ui/admin-family-form-page';

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import type { CatalogPreview } from '@/shared/lib/catalog-nav';
+import type { CatalogPreview } from '@/shared/lib/catalog/nav';
 
 export function CatalogPreviewPanel({
   preview,

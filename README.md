@@ -66,10 +66,16 @@ Cupón demo: `WELCOME10`
 src/
   app/       → routing Next.js (re-exports)
   views/     → pantallas (capa pages FSD; no usar src/pages/)
+    catalog/ → index, family, category, subcategory…
+    admin/   → dashboard, products, orders…
   widgets/   → bloques UI compuestos
+    catalog/ → breadcrumb, filters-panel, product-listing…
+    admin/   → layout, sidebar, route-guard…
   features/  → acciones de usuario
-  entities/  → dominio + API
+  entities/  → dominio + API (catalog/, admin/)
   shared/    → UI, cliente HTTP, utilidades
+    lib/catalog/   → query-state, nav, sort
+    hooks/catalog/ → use-query-state
 ```
 
 ## Rutas
