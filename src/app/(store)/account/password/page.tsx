@@ -1,1 +1,5 @@
-﻿export { AccountPasswordPage as default } from '@/views/account-password/ui/account-password-page';
+﻿import { redirect } from 'next/navigation';
+
+export default function AccountPasswordPage() {
+  redirect('/account');
+}

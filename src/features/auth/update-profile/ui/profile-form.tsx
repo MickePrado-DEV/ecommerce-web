@@ -30,7 +30,7 @@ export function ProfileForm() {
   return (
     <form
       onSubmit={form.handleSubmit((d) => save.mutate(d))}
-      className="space-y-4 rounded-lg border border-white/10 p-6"
+      className="space-y-4 rounded-lg border border-gray-800 bg-gray-900/80 p-6"
     >
       <div>
         <Label>Nombre</Label>
@@ -44,7 +44,11 @@ export function ProfileForm() {
         <Label>Teléfono</Label>
         <Input {...form.register('phone')} />
       </div>
-      {user?.email && <p className="text-sm text-zinc-500">{user.email}</p>}
+      <div>
+        <Label>Correo electrónico</Label>
+        <Input value={user?.email ?? ''} disabled className="bg-gray-950 text-gray-400" />
+        <p className="mt-1 text-xs text-gray-500">El correo no se puede cambiar desde aquí.</p>
+      </div>
       <Button type="submit" disabled={save.isPending}>
         Guardar
       </Button>

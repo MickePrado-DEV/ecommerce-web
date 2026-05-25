@@ -36,7 +36,7 @@ export function ChangePasswordForm() {
   return (
     <form
       onSubmit={form.handleSubmit((d) => save.mutate(d))}
-      className="space-y-4 rounded-lg border border-white/10 p-6"
+      className="space-y-4 rounded-lg border border-gray-800 bg-gray-900/80 p-6"
     >
       <div>
         <Label>Contraseña actual</Label>
