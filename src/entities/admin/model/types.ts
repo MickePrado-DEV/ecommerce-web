@@ -106,6 +106,7 @@ export interface ProductOptionDto {
   id: string;
   productId: string;
   name: string;
+  optionType: number;
   sortOrder: number;
   values: OptionValueDto[];
 }

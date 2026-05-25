@@ -7,6 +7,7 @@ import type {
   PagedOrdersDto,
   PaymentResultDto,
 } from '../model/types';
+import type { PayOrderRequest } from '../model/payment-types';
 
 export const orderApi = {
   checkout: (body: CheckoutRequest) =>
@@ -22,7 +23,11 @@ export const orderApi = {
 
   tracking: (id: string) => api<OrderTrackingDto>(`/orders/${id}/tracking`),
 
-  pay: (id: string) => api<PaymentResultDto>(`/orders/${id}/pay`, { method: 'POST' }),
+  pay: (id: string, card?: PayOrderRequest) =>
+    api<PaymentResultDto>(`/orders/${id}/pay`, {
+      method: 'POST',
+      body: card ? JSON.stringify(card) : undefined,
+    }),
 
   cancel: (id: string) => api<void>(`/orders/${id}/cancel`, { method: 'POST' }),
 };

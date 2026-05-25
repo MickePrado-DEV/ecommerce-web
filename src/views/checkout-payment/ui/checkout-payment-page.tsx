@@ -43,7 +43,7 @@ export function CheckoutPaymentPage() {
         <p className="text-lg font-semibold text-violet-400">{formatMoney(order.total)}</p>
       </CardHeader>
       <CardContent>
-        <PaymentMockForm onPay={() => pay.mutate()} loading={pay.isPending} />
+        <PaymentMockForm onPay={(card) => pay.mutate(card)} loading={pay.isPending} />
       </CardContent>
     </Card>
   );

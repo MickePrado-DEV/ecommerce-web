@@ -100,7 +100,10 @@ export function AddressPicker({
               {a.isDefault && <span className="ml-2 text-xs text-violet-400">(predeterminada)</span>}
             </p>
             <p className="text-sm text-zinc-400">
-              {a.street}, {a.city}, {a.state} {a.postalCode}
+              {a.street}
+              {a.externalNumber ? ` ${a.externalNumber}` : ''}
+              {a.neighborhood ? `, ${a.neighborhood}` : ''} — {a.municipality ?? a.city}, {a.state}{' '}
+              {a.postalCode}
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               <Button

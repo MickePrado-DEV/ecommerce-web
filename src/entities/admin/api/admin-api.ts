@@ -98,6 +98,10 @@ export const adminApi = {
           method: 'POST',
           body: JSON.stringify(body),
         }),
+  deleteOptionValue: (productId: string, optionId: string, valueId: string) =>
+    api<void>(`/admin/products/${productId}/options/${optionId}/values/${valueId}`, {
+      method: 'DELETE',
+    }),
 
   // Inventory
   listInventory: () => api<InventoryDto[]>('/admin/inventory'),

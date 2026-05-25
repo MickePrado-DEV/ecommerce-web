@@ -1,31 +1,89 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { adminApi } from '@/entities/admin/api/admin-api';
+import type { CoverAdminDto } from '@/entities/admin/model/types';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { PageHeader } from '@/shared/ui/page-header';
 import { Button } from '@/shared/ui/button';
 import { toast } from 'sonner';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { GripVertical } from 'lucide-react';
+
+function SortableCoverRow({
+  cover,
+  onDelete,
+}: {
+  cover: CoverAdminDto;
+  onDelete: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: cover.id,
+  });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+  };
+
+  return (
+    <tr ref={setNodeRef} style={style} className="border-b border-white/5 bg-zinc-950/50">
+      <td className="p-2">
+        <button
+          type="button"
+          className="cursor-grab rounded p-1 hover:bg-white/10 active:cursor-grabbing"
+          aria-label="Arrastrar"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-4 w-4 text-zinc-500" />
+        </button>
+      </td>
+      <td className="p-2">{cover.title}</td>
+      <td className="p-2">{cover.isActive ? 'Sí' : 'No'}</td>
+      <td className="flex gap-2 p-2">
+        <Button size="sm" variant="outline" asChild>
+          <Link href={`/admin/covers/${cover.id}/edit`}>Editar</Link>
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => onDelete(cover.id)}>
+          Eliminar
+        </Button>
+      </td>
+    </tr>
+  );
+}
 
 export function AdminCoversPage() {
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: queryKeys.adminCovers, queryFn: adminApi.listCovers });
-  const [order, setOrder] = useState<string[]>([]);
 
-  const sorted = useMemo(() => {
-    const list = [...(data ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
-    if (order.length === list.length && order.every((id, i) => list[i]?.id === id)) return list;
-    if (order.length) {
-      const map = new Map(list.map((c) => [c.id, c]));
-      return order.map((id) => map.get(id)).filter(Boolean) as typeof list;
-    }
-    return list;
-  }, [data, order]);
+  const sorted = useMemo(
+    () => [...(data ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
+    [data],
+  );
 
-  const syncOrder = (items: typeof sorted) => setOrder(items.map((c) => c.id));
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   const del = useMutation({
     mutationFn: adminApi.deleteCover,
@@ -44,12 +102,13 @@ export function AdminCoversPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const move = (index: number, dir: -1 | 1) => {
-    const next = [...sorted];
-    const j = index + dir;
-    if (j < 0 || j >= next.length) return;
-    [next[index], next[j]] = [next[j], next[index]];
-    syncOrder(next);
+  const onDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = sorted.findIndex((c) => c.id === active.id);
+    const newIndex = sorted.findIndex((c) => c.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    const next = arrayMove(sorted, oldIndex, newIndex);
     reorder.mutate(next.map((c) => c.id));
   };
 
@@ -65,58 +124,26 @@ export function AdminCoversPage() {
           </Button>
         }
       />
-      <p className="mb-4 text-sm text-zinc-400">
-        Usa las flechas para reordenar (equivalente al drag de Laravel → POST sort/covers).
-      </p>
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-white/10 text-zinc-400">
-            <th className="p-2">Orden</th>
-            <th className="p-2">Título</th>
-            <th className="p-2">Activa</th>
-            <th className="p-2" />
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((c, index) => (
-            <tr key={c.id} className="border-b border-white/5">
-              <td className="p-2">
-                <div className="flex items-center gap-1">
-                  <span className="w-6 text-zinc-500">{index + 1}</span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={index === 0 || reorder.isPending}
-                    onClick={() => move(index, -1)}
-                    aria-label="Subir"
-                  >
-                    <ChevronUp className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={index === sorted.length - 1 || reorder.isPending}
-                    onClick={() => move(index, 1)}
-                    aria-label="Bajar"
-                  >
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </div>
-              </td>
-              <td className="p-2">{c.title}</td>
-              <td className="p-2">{c.isActive ? 'Sí' : 'No'}</td>
-              <td className="flex gap-2 p-2">
-                <Button size="sm" variant="outline" asChild>
-                  <Link href={`/admin/covers/${c.id}/edit`}>Editar</Link>
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => del.mutate(c.id)}>
-                  Eliminar
-                </Button>
-              </td>
+      <p className="mb-4 text-sm text-zinc-400">Arrastra las filas para reordenar (PATCH /admin/covers/reorder).</p>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b border-white/10 text-zinc-400">
+              <th className="w-10 p-2" />
+              <th className="p-2">Título</th>
+              <th className="p-2">Activa</th>
+              <th className="p-2" />
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <SortableContext items={sorted.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+            <tbody>
+              {sorted.map((c) => (
+                <SortableCoverRow key={c.id} cover={c} onDelete={(id) => del.mutate(id)} />
+              ))}
+            </tbody>
+          </SortableContext>
+        </table>
+      </DndContext>
     </div>
   );
 }

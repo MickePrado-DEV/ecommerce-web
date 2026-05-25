@@ -45,7 +45,9 @@ export function AccountAddressesPage() {
         {data?.map((a) => (
           <li key={a.id} className="rounded-lg border border-white/10 p-4">
             <p className="font-medium">{a.label} {a.isDefault && <span className="text-xs text-violet-400">(predeterminada)</span>}</p>
-            <p className="text-sm text-zinc-400">{a.street}, {a.city}</p>
+            <p className="text-sm text-zinc-400">
+              {a.street}{a.externalNumber ? ` ${a.externalNumber}` : ''}, {a.neighborhood ?? a.city}
+            </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button size="sm" variant="outline" asChild><Link href={`/account/addresses/${a.id}/edit`}>Editar</Link></Button>
               {!a.isDefault && (
