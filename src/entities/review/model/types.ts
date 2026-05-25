@@ -22,3 +22,10 @@ export interface CreateProductReviewRequest {
   title?: string;
   comment: string;
 }
+
+export interface ProductReviewEligibilityDto {
+  canReview: boolean;
+  alreadyReviewed: boolean;
+  hasDeliveredPurchase: boolean;
+  message?: string | null;
+}

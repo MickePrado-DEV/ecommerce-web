@@ -4,6 +4,7 @@ export const queryKeys = {
   products: (qs: string) => ['catalog', 'products', qs] as const,
   product: (slug: string) => ['catalog', 'product', slug] as const,
   productReviews: (slug: string) => ['catalog', 'reviews', slug] as const,
+  productReviewEligibility: (slug: string) => ['catalog', 'reviews', slug, 'eligibility'] as const,
   cart: ['cart'] as const,
   wishlist: ['wishlist'] as const,
   addresses: ['addresses'] as const,

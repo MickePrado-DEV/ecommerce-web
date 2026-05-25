@@ -13,6 +13,13 @@ export const authApi = {
   login: (body: LoginRequest) =>
     api<LoginResponse>('/auth/login', { method: 'POST', body: JSON.stringify(body), auth: false }),
 
+  refresh: (refreshToken: string) =>
+    api<LoginResponse>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
+      auth: false,
+    }),
+
   registerCustomer: (body: RegisterCustomerRequest) =>
     api<LoginResponse>('/auth/register/customer', { method: 'POST', body: JSON.stringify(body), auth: false }),
 

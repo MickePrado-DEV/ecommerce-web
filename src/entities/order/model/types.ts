@@ -12,6 +12,8 @@ export interface OrderItemDto {
   quantity: number;
   unitPrice: number;
   lineTotal: number;
+  productId?: string | null;
+  productSlug?: string | null;
 }
 
 export interface OrderAddressDto {
