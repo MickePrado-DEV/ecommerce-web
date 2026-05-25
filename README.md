@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ecommerce-web
 
-## Getting Started
+Frontend **Next.js 16** + TypeScript + **Feature-Sliced Design** para el API Ecommerce (.NET 10).
 
-First, run the development server:
+## Requisitos
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 20+
+- API en ejecución: `http://localhost:5088/api/v1`
+
+## Configuración
+
+```powershell
+cp .env.example .env.local
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Desarrollo
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```powershell
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Abre [http://localhost:3000](http://localhost:3000)
 
-## Learn More
+## Producción
 
-To learn more about Next.js, take a look at the following resources:
+```powershell
+npm run build
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Usuarios demo (API)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Rol | Email | Contraseña |
+|-----|-------|------------|
+| Cliente | cliente@ecommerce.local | Cliente123! |
+| Admin | admin@ecommerce.local | Admin123! |
+| Repartidor | repartidor@ecommerce.local | Repartidor123! |
 
-## Deploy on Vercel
+Cupón demo: `WELCOME10`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Estructura FSD
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+  app/       → routing Next.js (re-exports)
+  views/     → pantallas (capa pages FSD; no usar src/pages/)
+  widgets/   → bloques UI compuestos
+  features/  → acciones de usuario
+  entities/  → dominio + API
+  shared/    → UI, cliente HTTP, utilidades
+```
+
+## Rutas
+
+Tienda, cuenta, checkout, admin CRUD, panel repartidor — ver `C:\Udemy\Next\README.md` o la documentación del API en `ecommerce-api/docs/`.
+
+## Documentación
+
+- [Guía completa frontend](file:///C:/Udemy/.net/Ecommerce/ecommerce-api/docs/10-frontend-nextjs-fsd-completo.md)
+- [Inventario de archivos](file:///C:/Udemy/.net/Ecommerce/ecommerce-api/docs/INVENTARIO-FRONTEND-ARCHIVOS.md)

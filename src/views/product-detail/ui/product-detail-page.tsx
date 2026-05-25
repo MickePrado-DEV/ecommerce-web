@@ -1,24 +1,20 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { catalogApi } from '@/entities/catalog/api/catalog-api';
-import { cartApi } from '@/entities/cart/api/cart-api';
-import { wishlistApi } from '@/entities/wishlist/api/wishlist-api';
-import { reviewApi } from '@/entities/review/api/review-api';
-import { ReviewForm } from '@/features/review/create-review/ui/review-form';
 import { queryKeys } from '@/shared/lib/query-keys';
-import { formatMoney } from '@/shared/lib/format-money';
-import { Button } from '@/shared/ui/button';
+import { PriceTag } from '@/shared/ui/price-tag';
 import { Skeleton } from '@/shared/ui/skeleton';
-import { toast } from 'sonner';
+import { VariantSelector } from '@/entities/product/ui/variant-selector';
+import { AddToCartButton } from '@/features/cart/add-to-cart/ui/add-to-cart-button';
+import { WishlistButton } from '@/features/wishlist/toggle-wishlist/ui/wishlist-button';
+import { ProductReviewsList } from '@/widgets/product-reviews/ui/product-reviews-list';
 import Image from 'next/image';
 
 export function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-  const qc = useQueryClient();
-  const [selected, setSelected] = useState<Record<string, string>>({});
   const [variantId, setVariantId] = useState<string>();
 
   const { data: product, isLoading } = useQuery({
@@ -26,101 +22,28 @@ export function ProductDetailPage() {
     queryFn: () => catalogApi.getProduct(slug),
   });
 
-  const { data: reviews } = useQuery({
-    queryKey: queryKeys.productReviews(slug),
-    queryFn: () => reviewApi.list(slug),
-  });
-
-  const optionIds = Object.values(selected);
-  useQuery({
-    queryKey: ['resolve', slug, optionIds.join(',')],
-    queryFn: async () => {
-      const v = await catalogApi.resolveVariant(slug, optionIds);
-      setVariantId(v.variantId);
-      return v;
-    },
-    enabled: product != null && product.options.length > 0 && optionIds.length === product.options.length,
-  });
-
-  const addCart = useMutation({
-    mutationFn: () => cartApi.addItem({ variantId: variantId!, quantity: 1 }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.cart });
-      toast.success('Agregado al carrito');
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const addWish = useMutation({
-    mutationFn: () => wishlistApi.add(product!.id),
-    onSuccess: () => toast.success('Agregado a favoritos'),
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   if (isLoading || !product) return <Skeleton className="h-96 w-full" />;
 
-  const effectiveVariant =
-    variantId ?? (product.variants.length === 1 ? product.variants[0].id : undefined);
-
   return (
-    <div className="grid gap-10 lg:grid-cols-2">
-      <div className="relative aspect-square overflow-hidden rounded-lg border border-white/10">
-        {product.images[0] && (
-          <Image src={product.images[0]} alt={product.name} fill className="object-cover" unoptimized />
-        )}
-      </div>
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold">{product.name}</h1>
-        <p className="text-zinc-400">{product.description}</p>
-        <p className="text-2xl font-semibold text-violet-400">{formatMoney(product.basePrice)}</p>
-
-        {product.options.map((opt) => (
-          <div key={opt.id}>
-            <p className="mb-2 text-sm font-medium">{opt.name}</p>
-            <div className="flex flex-wrap gap-2">
-              {opt.values.map((v) => (
-                <Button
-                  key={v.id}
-                  type="button"
-                  size="sm"
-                  variant={selected[opt.id] === v.id ? 'default' : 'outline'}
-                  onClick={() => setSelected((s) => ({ ...s, [opt.id]: v.id }))}
-                >
-                  {v.value}
-                </Button>
-              ))}
-            </div>
+    <div className="space-y-12">
+      <div className="grid gap-10 lg:grid-cols-2">
+        <div className="relative aspect-square overflow-hidden rounded-lg border border-white/10">
+          {product.images[0] && (
+            <Image src={product.images[0]} alt={product.name} fill className="object-cover" unoptimized />
+          )}
+        </div>
+        <div className="space-y-6">
+          <h1 className="text-3xl font-bold">{product.name}</h1>
+          <p className="text-zinc-400">{product.description}</p>
+          <PriceTag amount={product.basePrice} className="text-2xl" />
+          <VariantSelector product={product} slug={slug} onResolved={setVariantId} />
+          <div className="flex flex-wrap gap-3">
+            <AddToCartButton variantId={variantId} />
+            <WishlistButton productId={product.id} slug={slug} />
           </div>
-        ))}
-
-        <div className="flex flex-wrap gap-3">
-          <Button disabled={!effectiveVariant} onClick={() => addCart.mutate()}>
-            Agregar al carrito
-          </Button>
-          <Button variant="outline" onClick={() => addWish.mutate()}>
-            Favoritos
-          </Button>
         </div>
       </div>
-
-      <section className="mt-12 border-t border-white/10 pt-8 lg:col-span-2">
-        <h2 className="mb-4 text-xl font-semibold">Reseñas</h2>
-        {reviews?.summary && (
-          <p className="mb-4 text-sm text-zinc-400">
-            {reviews.summary.averageRating.toFixed(1)} ★ · {reviews.summary.totalCount} opiniones
-          </p>
-        )}
-        <ReviewForm productSlug={slug} />
-        <ul className="mt-6 space-y-4">
-          {reviews?.items.map((r) => (
-            <li key={r.id} className="rounded-lg border border-white/10 p-4">
-              <p className="font-medium">{r.authorName} · {r.rating}★</p>
-              {r.title && <p className="text-sm">{r.title}</p>}
-              <p className="text-sm text-zinc-400">{r.comment}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <ProductReviewsList slug={slug} />
     </div>
   );
 }

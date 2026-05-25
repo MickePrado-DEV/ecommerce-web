@@ -1,13 +1,5 @@
 import { api } from '@/shared/api/client';
-
-export interface WishlistItemDto {
-  productId: string;
-  name: string;
-  slug: string;
-  price: number;
-  primaryImage?: string | null;
-  addedAt: string;
-}
+import type { WishlistItemDto } from '../model/types';
 
 export const wishlistApi = {
   list: () => api<WishlistItemDto[]>('/wishlist'),

@@ -1,21 +1,18 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { orderApi } from '@/entities/order/api/order-api';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { formatMoney } from '@/shared/lib/format-money';
 import { PageHeader } from '@/shared/ui/page-header';
 import { OrderStatusBadge } from '@/entities/order/ui/order-status-badge';
 import { OrderTrackingCard } from '@/widgets/order-tracking-card/ui/order-tracking-card';
-import { canCancelOrder, canPayOrder } from '@/shared/lib/order-status';
-import Link from 'next/link';
-import { Button } from '@/shared/ui/button';
-import { toast } from 'sonner';
+import { CancelOrderButton } from '@/features/order/cancel-order/ui/cancel-order-button';
+import { RetryPaymentButton } from '@/features/order/retry-payment/ui/retry-payment-button';
 
 export function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const qc = useQueryClient();
   const { data: order, isLoading } = useQuery({
     queryKey: queryKeys.order(id),
     queryFn: () => orderApi.get(id),
@@ -24,15 +21,6 @@ export function OrderDetailPage() {
     queryKey: ['order-tracking', id],
     queryFn: () => orderApi.tracking(id),
     enabled: !!id,
-  });
-
-  const cancel = useMutation({
-    mutationFn: () => orderApi.cancel(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.order(id) });
-      toast.success('Pedido cancelado');
-    },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   if (isLoading || !order) return <p>Cargando…</p>;
@@ -45,16 +33,8 @@ export function OrderDetailPage() {
           <h2 className="mb-4 font-semibold">Estado</h2>
           <OrderStatusBadge status={order.status} />
           <div className="mt-4 flex flex-wrap gap-2">
-            {canPayOrder(order.status) && (
-              <Button asChild>
-                <Link href={`/checkout/payment/${order.id}`}>Pagar ahora</Link>
-              </Button>
-            )}
-            {canCancelOrder(order.status) && (
-              <Button variant="outline" onClick={() => cancel.mutate()} disabled={cancel.isPending}>
-                Cancelar pedido
-              </Button>
-            )}
+            <RetryPaymentButton orderId={order.id} status={order.status} />
+            <CancelOrderButton orderId={order.id} status={order.status} />
           </div>
         </section>
         <section className="rounded-lg border border-white/10 p-6">
