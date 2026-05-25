@@ -37,6 +37,8 @@ export const adminApi = {
       ? api<CoverAdminDto>(`/admin/covers/${id}`, { method: 'PUT', body: JSON.stringify(body) })
       : api<CoverAdminDto>('/admin/covers', { method: 'POST', body: JSON.stringify(body) }),
   deleteCover: (id: string) => api<void>(`/admin/covers/${id}`, { method: 'DELETE' }),
+  reorderCovers: (ids: string[]) =>
+    api<void>('/admin/covers/reorder', { method: 'PATCH', body: JSON.stringify({ ids }) }),
 
   // Catalog
   listFamilies: () => api<FamilyAdminDto[]>('/admin/catalog/families'),

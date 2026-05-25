@@ -3,6 +3,7 @@ import type { ResolvedVariantDto } from '@/entities/product/model/types';
 import type { ProductDetailDto } from '@/entities/product/model/types';
 import type {
   CatalogHomeDto,
+  CatalogOptionDto,
   CategoryDetailDto,
   CoverDto,
   FamilyDto,
@@ -25,6 +26,17 @@ export const catalogApi = {
 
   getProducts: (params: URLSearchParams) =>
     api<PagedProducts>(`/catalog/products?${params}`, { auth: false }),
+
+  getFilterOptions: (scope: { familyId?: string; categoryId?: string; subCategoryId?: string }) => {
+    const q = new URLSearchParams();
+    if (scope.familyId) q.set('familyId', scope.familyId);
+    if (scope.categoryId) q.set('categoryId', scope.categoryId);
+    if (scope.subCategoryId) q.set('subCategoryId', scope.subCategoryId);
+    const qs = q.toString();
+    return api<CatalogOptionDto[]>(`/catalog/products/filter-options${qs ? `?${qs}` : ''}`, {
+      auth: false,
+    });
+  },
 
   search: (q: string, page = 1, pageSize = 20) =>
     api<PagedProducts>(

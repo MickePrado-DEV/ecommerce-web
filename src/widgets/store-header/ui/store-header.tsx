@@ -7,6 +7,7 @@ import { useAuthStore } from '@/entities/user/model/auth-store';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { LogoutButton } from '@/features/auth/logout/ui/logout-button';
 import { CatalogDrawer } from '@/widgets/catalog-drawer/ui/catalog-drawer';
+import { HeaderSearch } from '@/features/catalog/header-search/ui/header-search';
 import { Button } from '@/shared/ui/button';
 import { ShoppingCart, User } from 'lucide-react';
 
@@ -25,6 +26,7 @@ export function StoreHeader() {
             Ecommerce
           </Link>
         </div>
+        <HeaderSearch />
         <nav className="hidden gap-6 md:flex">
           <Link href="/" className="text-sm hover:text-violet-400">
             Inicio

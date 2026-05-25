@@ -14,6 +14,5 @@ export function FamilyCatalogPage() {
 
   if (!family) return <p>Cargando…</p>;
 
-  const params = new URLSearchParams({ familyId: family.id, page: '1', pageSize: '24' });
-  return <CatalogProductGrid title={family.name} params={params} />;
+  return <CatalogProductGrid title={family.name} scope={{ familyId: family.id }} />;
 }

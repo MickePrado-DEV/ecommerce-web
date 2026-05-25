@@ -14,6 +14,5 @@ export function CategoryCatalogPage() {
 
   if (!category) return <p>Cargando…</p>;
 
-  const params = new URLSearchParams({ categoryId: category.id, page: '1', pageSize: '24' });
-  return <CatalogProductGrid title={category.name} params={params} />;
+  return <CatalogProductGrid title={category.name} scope={{ categoryId: category.id }} />;
 }

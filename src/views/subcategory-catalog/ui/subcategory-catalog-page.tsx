@@ -14,6 +14,5 @@ export function SubcategoryCatalogPage() {
 
   if (!sub) return <p>Cargando…</p>;
 
-  const params = new URLSearchParams({ subCategoryId: sub.id, page: '1', pageSize: '24' });
-  return <CatalogProductGrid title={sub.name} params={params} />;
+  return <CatalogProductGrid title={sub.name} scope={{ subCategoryId: sub.id }} />;
 }

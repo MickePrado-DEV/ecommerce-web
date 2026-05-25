@@ -55,7 +55,12 @@ export function LoginForm() {
           </div>
           <Button type="submit" className="w-full">Entrar</Button>
           <p className="text-center text-sm text-zinc-400">
-            <Link href="/register" className="text-violet-400 hover:underline">Crear cuenta</Link>
+            <Link
+              href={params.get('redirect') ? `/register?redirect=${encodeURIComponent(params.get('redirect')!)}` : '/register'}
+              className="text-violet-400 hover:underline"
+            >
+              Crear cuenta
+            </Link>
           </p>
         </form>
       </CardContent>

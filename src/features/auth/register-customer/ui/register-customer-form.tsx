@@ -3,9 +3,11 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { authApi } from '@/entities/user/api/auth-api';
+import { cartApi } from '@/entities/cart/api/cart-api';
 import { useAuthStore } from '@/entities/user/model/auth-store';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
@@ -21,8 +23,9 @@ const schema = z.object({
   phone: z.string().optional(),
 });
 
-export function RegisterCustomerForm() {
+function RegisterCustomerFormInner() {
   const router = useRouter();
+  const params = useSearchParams();
   const setSession = useAuthStore((s) => s.setSession);
   const form = useForm({ resolver: zodResolver(schema) });
 
@@ -30,8 +33,10 @@ export function RegisterCustomerForm() {
     try {
       const res = await authApi.registerCustomer(data);
       setSession(res.user, res.permissions, res.accessToken, res.refreshToken);
+      const guest = localStorage.getItem('guestToken');
+      if (guest) await cartApi.merge(guest);
       toast.success('Cuenta creada');
-      router.push('/');
+      router.push(params.get('redirect') ?? '/checkout/shipping');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Error al registrarse');
     }
@@ -56,5 +61,13 @@ export function RegisterCustomerForm() {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+export function RegisterCustomerForm() {
+  return (
+    <Suspense>
+      <RegisterCustomerFormInner />
+    </Suspense>
   );
 }

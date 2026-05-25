@@ -1,17 +1,23 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import { cartApi } from '@/entities/cart/api/cart-api';
+import { useAuthStore } from '@/entities/user/model/auth-store';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { formatMoney } from '@/shared/lib/format-money';
 import { Button } from '@/shared/ui/button';
-import Link from 'next/link';
 
 export function CartSummary({ showCheckoutLink = true }: { showCheckoutLink?: boolean }) {
+  const user = useAuthStore((s) => s.user);
   const { data: cart, isLoading } = useQuery({ queryKey: queryKeys.cart, queryFn: cartApi.get });
 
   if (isLoading) return <p className="text-sm text-zinc-500">Cargando…</p>;
   if (!cart?.items.length) return <p className="text-sm text-zinc-500">Carrito vacío</p>;
+
+  const checkoutHref = user
+    ? '/checkout/shipping'
+    : `/login?redirect=${encodeURIComponent('/checkout/shipping')}`;
 
   return (
     <div className="rounded-lg border border-white/10 bg-white/5 p-6">
@@ -32,7 +38,7 @@ export function CartSummary({ showCheckoutLink = true }: { showCheckoutLink?: bo
       </div>
       {showCheckoutLink && (
         <Button className="mt-4 w-full" asChild>
-          <Link href="/checkout/shipping">Continuar al checkout</Link>
+          <Link href={checkoutHref}>{user ? 'Continuar al checkout' : 'Iniciar sesión para pagar'}</Link>
         </Button>
       )}
     </div>

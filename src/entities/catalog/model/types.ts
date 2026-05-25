@@ -62,3 +62,16 @@ export interface PagedResult<T> {
 }
 
 export type PagedProducts = PagedResult<ProductListItemDto>;
+
+export interface CatalogOptionValueDto {
+  id: string;
+  value: string;
+  sortOrder: number;
+}
+
+export interface CatalogOptionDto {
+  id: string;
+  name: string;
+  sortOrder: number;
+  values: CatalogOptionValueDto[];
+}
