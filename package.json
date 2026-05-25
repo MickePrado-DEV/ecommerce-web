@@ -4,9 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "npm run clean && next dev",
     "build": "next build",
+    "build:clean": "npm run clean && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "clean": "node scripts/clean-next.mjs",
+    "generate:barrels": "node scripts/generate-barrels.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

@@ -20,6 +20,27 @@ npm install
 npm run dev
 ```
 
+Si en Windows aparece `EPERM` al renombrar archivos en `.next` (varias instancias de `next dev` o antivirus bloqueando la carpeta):
+
+```powershell
+# Cierra otros `npm run dev`, luego:
+npm run dev:clean
+```
+
+Eso borra `.next` y arranca de nuevo.
+
+## Scripts útiles
+
+| Comando | Descripción |
+|---------|-------------|
+| `npm run dev:clean` | Limpia caché `.next` y arranca dev |
+| `npm run clean` | Solo elimina `.next` |
+| `npm run generate:barrels` | Regenera `index.ts` FSD en entities/features/widgets/views |
+
+## Proxy (auth de rutas)
+
+Next.js 16 usa `src/proxy.ts` (antes `middleware.ts`) para redirigir a `/login` si no hay cookie `accessToken`.
+
 Abre [http://localhost:3000](http://localhost:3000)
 
 ## Producción

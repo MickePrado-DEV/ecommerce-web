@@ -84,6 +84,24 @@ export interface PagedProductsAdminDto {
   pageSize: number;
 }
 
+export interface UserAdminDto {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string | null;
+  isActive: boolean;
+  roles: string[];
+  createdAt: string;
+}
+
+export interface PagedUsersAdminDto {
+  items: UserAdminDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface ProductOptionDto {
   id: string;
   productId: string;

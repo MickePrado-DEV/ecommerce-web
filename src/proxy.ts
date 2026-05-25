@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
   const path = request.nextUrl.pathname;
 
@@ -23,5 +23,13 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/checkout/:path*', '/orders/:path*', '/account/:path*', '/wishlist', '/wishlist/:path*', '/admin/:path*', '/driver/:path*'],
+  matcher: [
+    '/checkout/:path*',
+    '/orders/:path*',
+    '/account/:path*',
+    '/wishlist',
+    '/wishlist/:path*',
+    '/admin/:path*',
+    '/driver/:path*',
+  ],
 };

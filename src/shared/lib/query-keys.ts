@@ -19,5 +19,7 @@ export const queryKeys = {
   adminOrder: (id: string) => ['admin', 'order', id] as const,
   adminShipments: ['admin', 'shipments'] as const,
   adminDrivers: ['admin', 'drivers'] as const,
+  adminUsers: (page: number, search?: string) => ['admin', 'users', page, search] as const,
+  adminUser: (id: string) => ['admin', 'user', id] as const,
   driverShipments: ['driver', 'shipments'] as const,
 };

@@ -6,6 +6,8 @@ import type {
   CoverAdminDto,
   DriverAdminDto,
   FamilyAdminDto,
+  PagedUsersAdminDto,
+  UserAdminDto,
   InventoryDto,
   PagedProductsAdminDto,
   ProductAdminDto,
@@ -129,4 +131,14 @@ export const adminApi = {
       ? api<DriverAdminDto>(`/admin/drivers/${id}`, { method: 'PUT', body: JSON.stringify(body) })
       : api<DriverAdminDto>('/admin/drivers', { method: 'POST', body: JSON.stringify(body) }),
   deleteDriver: (id: string) => api<void>(`/admin/drivers/${id}`, { method: 'DELETE' }),
+
+  // Users
+  listUsers: (page = 1, pageSize = 20, search?: string) => {
+    const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+    if (search) q.set('search', search);
+    return api<PagedUsersAdminDto>(`/admin/users?${q}`);
+  },
+  getUser: (id: string) => api<UserAdminDto>(`/admin/users/${id}`),
+  updateUser: (id: string, body: { isActive: boolean; roleCodes: string[] }) =>
+    api<UserAdminDto>(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
 };
