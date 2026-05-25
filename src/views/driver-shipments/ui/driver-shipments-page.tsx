@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Link from 'next/link';
 import { driverApi } from '@/entities/driver/api/driver-api';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { Button } from '@/shared/ui/button';
@@ -36,7 +37,12 @@ export function DriverShipmentsPage() {
       <h1 className="text-2xl font-bold">Mis envíos</h1>
       {data?.map((s) => (
         <div key={s.shipmentId} className="rounded-lg border border-white/10 p-4">
-          <p className="font-medium">{s.orderNumber} · {s.status}</p>
+          <p className="font-medium">
+            <Link href={`/driver/shipments/${s.shipmentId}`} className="text-violet-400 hover:underline">
+              {s.orderNumber}
+            </Link>
+            {' '}· {s.status}
+          </p>
           <p className="text-sm text-zinc-400">{s.customerName}</p>
           <p className="text-sm">{s.street}, {s.city}</p>
           <div className="mt-3 flex gap-2">

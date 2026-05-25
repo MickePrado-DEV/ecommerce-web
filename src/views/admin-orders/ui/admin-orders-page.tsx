@@ -39,7 +39,9 @@ export function AdminOrdersPage() {
         <tbody>
           {data?.items.map((o) => (
             <tr key={o.id} className="border-b border-white/5">
-              <td className="p-2">{o.orderNumber}</td>
+              <td className="p-2">
+                <a href={`/admin/orders/${o.id}`} className="text-violet-400 hover:underline">{o.orderNumber}</a>
+              </td>
               <td className="p-2">{o.status}</td>
               <td className="p-2">{formatMoney(o.total)}</td>
               <td className="p-2">

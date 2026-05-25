@@ -3,9 +3,11 @@ import type { ResolvedVariantDto } from '@/entities/product/model/types';
 import type { ProductDetailDto } from '@/entities/product/model/types';
 import type {
   CatalogHomeDto,
+  CategoryDetailDto,
   CoverDto,
   FamilyDto,
   PagedProducts,
+  SubcategoryDetailDto,
 } from '../model/types';
 
 export const catalogApi = {
@@ -16,10 +18,10 @@ export const catalogApi = {
   getFamily: (slug: string) => api<FamilyDto>(`/catalog/families/${slug}`, { auth: false }),
 
   getCategory: (slug: string) =>
-    api<import('../model/types').CategoryDetailDto>(`/catalog/categories/${slug}`, { auth: false }),
+    api<CategoryDetailDto>(`/catalog/categories/${slug}`, { auth: false }),
 
   getSubcategory: (slug: string) =>
-    api<import('../model/types').SubcategoryDetailDto>(`/catalog/subcategories/${slug}`, { auth: false }),
+    api<SubcategoryDetailDto>(`/catalog/subcategories/${slug}`, { auth: false }),
 
   getProducts: (params: URLSearchParams) =>
     api<PagedProducts>(`/catalog/products?${params}`, { auth: false }),

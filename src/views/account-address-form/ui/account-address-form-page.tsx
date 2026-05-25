@@ -11,9 +11,9 @@ import { Label } from '@/shared/ui/label';
 import { toast } from 'sonner';
 
 export function AccountAddressFormPage() {
-  const { id } = useParams<{ id?: string }>();
+  const id = useParams().id as string | undefined;
   const router = useRouter();
-  const isEdit = id && id !== 'new';
+  const isEdit = Boolean(id) && id !== 'new';
 
   const { data } = useQuery({
     queryKey: ['address', id],

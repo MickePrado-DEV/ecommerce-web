@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { catalogApi } from '@/entities/catalog/api/catalog-api';
 import { cartApi } from '@/entities/cart/api/cart-api';
 import { wishlistApi } from '@/entities/wishlist/api/wishlist-api';
+import { reviewApi } from '@/entities/review/api/review-api';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { formatMoney } from '@/shared/lib/format-money';
 import { Button } from '@/shared/ui/button';
@@ -22,6 +23,11 @@ export function ProductDetailPage() {
   const { data: product, isLoading } = useQuery({
     queryKey: queryKeys.product(slug),
     queryFn: () => catalogApi.getProduct(slug),
+  });
+
+  const { data: reviews } = useQuery({
+    queryKey: queryKeys.productReviews(slug),
+    queryFn: () => reviewApi.list(slug),
   });
 
   const optionIds = Object.values(selected);
@@ -95,6 +101,24 @@ export function ProductDetailPage() {
           </Button>
         </div>
       </div>
+
+      <section className="mt-12 border-t border-white/10 pt-8 lg:col-span-2">
+        <h2 className="mb-4 text-xl font-semibold">Reseñas</h2>
+        {reviews?.summary && (
+          <p className="mb-4 text-sm text-zinc-400">
+            {reviews.summary.averageRating.toFixed(1)} ★ · {reviews.summary.totalCount} opiniones
+          </p>
+        )}
+        <ul className="space-y-4">
+          {reviews?.items.map((r) => (
+            <li key={r.id} className="rounded-lg border border-white/10 p-4">
+              <p className="font-medium">{r.authorName} · {r.rating}★</p>
+              {r.title && <p className="text-sm">{r.title}</p>}
+              <p className="text-sm text-zinc-400">{r.comment}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }
