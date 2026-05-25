@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { orderApi } from '@/entities/order/api/order-api';
 import { formatMoney } from '@/shared/lib/format-money';
+import { OrderStatusBadge } from '@/entities/order/ui/order-status-badge';
 import Link from 'next/link';
 
 export function OrdersListPage() {
@@ -25,7 +26,7 @@ export function OrdersListPage() {
             >
               <div>
                 <p className="font-medium">{o.orderNumber}</p>
-                <p className="text-sm text-zinc-400">{o.status}</p>
+                <OrderStatusBadge status={o.status} />
               </div>
               <span className="text-violet-400">{formatMoney(o.total)}</span>
             </Link>

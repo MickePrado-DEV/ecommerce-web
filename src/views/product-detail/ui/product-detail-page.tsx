@@ -7,6 +7,7 @@ import { catalogApi } from '@/entities/catalog/api/catalog-api';
 import { cartApi } from '@/entities/cart/api/cart-api';
 import { wishlistApi } from '@/entities/wishlist/api/wishlist-api';
 import { reviewApi } from '@/entities/review/api/review-api';
+import { ReviewForm } from '@/features/review/create-review/ui/review-form';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { formatMoney } from '@/shared/lib/format-money';
 import { Button } from '@/shared/ui/button';
@@ -109,7 +110,8 @@ export function ProductDetailPage() {
             {reviews.summary.averageRating.toFixed(1)} ★ · {reviews.summary.totalCount} opiniones
           </p>
         )}
-        <ul className="space-y-4">
+        <ReviewForm productSlug={slug} />
+        <ul className="mt-6 space-y-4">
           {reviews?.items.map((r) => (
             <li key={r.id} className="rounded-lg border border-white/10 p-4">
               <p className="font-medium">{r.authorName} · {r.rating}★</p>

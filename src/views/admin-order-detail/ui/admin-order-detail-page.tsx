@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '@/entities/admin/api/admin-api';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { formatMoney } from '@/shared/lib/format-money';
+import { OrderStatusBadge } from '@/entities/order/ui/order-status-badge';
 import { PageHeader } from '@/shared/ui/page-header';
 import { Button } from '@/shared/ui/button';
 import { toast } from 'sonner';
@@ -34,7 +35,7 @@ export function AdminOrderDetailPage() {
         title={`Pedido ${order.orderNumber}`}
         action={<Button variant="outline" asChild><Link href="/admin/orders">← Pedidos</Link></Button>}
       />
-      <p>Estado: <strong>{order.status}</strong></p>
+      <OrderStatusBadge status={order.status} />
       <ul className="space-y-2 text-sm">
         {order.items.map((item, i) => (
           <li key={i} className="flex justify-between">
@@ -47,6 +48,11 @@ export function AdminOrderDetailPage() {
       <div className="flex flex-wrap gap-2">
         {order.status === 'Paid' && (
           <Button onClick={() => ready.mutate()}>Marcar listo despacho</Button>
+        )}
+        {order.status === 'ReadyToDispatch' && (
+          <Button variant="outline" asChild>
+            <Link href={`/admin/shipments/new?orderId=${order.id}`}>Crear envío</Link>
+          </Button>
         )}
         <Button variant="outline" asChild>
           <a href={adminApi.orderTicketUrl(id)} target="_blank" rel="noreferrer">Ticket PDF</a>

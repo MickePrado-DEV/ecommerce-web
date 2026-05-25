@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '@/entities/admin/api/admin-api';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { formatMoney } from '@/shared/lib/format-money';
+import { OrderStatusBadge } from '@/entities/order/ui/order-status-badge';
 import { Button } from '@/shared/ui/button';
 import { toast } from 'sonner';
 
@@ -42,7 +43,7 @@ export function AdminOrdersPage() {
               <td className="p-2">
                 <a href={`/admin/orders/${o.id}`} className="text-violet-400 hover:underline">{o.orderNumber}</a>
               </td>
-              <td className="p-2">{o.status}</td>
+              <td className="p-2"><OrderStatusBadge status={o.status} /></td>
               <td className="p-2">{formatMoney(o.total)}</td>
               <td className="p-2">
                 {o.status === 'Paid' && (

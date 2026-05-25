@@ -6,6 +6,7 @@ import { ProductCard } from '@/entities/product/ui/product-card';
 import { queryKeys } from '@/shared/lib/query-keys';
 import Link from 'next/link';
 import { Skeleton } from '@/shared/ui/skeleton';
+import { FamilyGrid } from '@/widgets/family-grid/ui/family-grid';
 
 export function HomePage() {
   const { data: home, isLoading, isError } = useQuery({
@@ -34,6 +35,8 @@ export function HomePage() {
           </div>
         </section>
       )}
+
+      <FamilyGrid />
 
       <section>
         <h2 className="mb-6 text-2xl font-semibold">Novedades</h2>
