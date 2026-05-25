@@ -1,1 +1,10 @@
-export { FamilyCatalogPage as default } from '@/views/family-catalog/ui/family-catalog-page';
+import { redirect } from 'next/navigation';
+
+export default async function LegacyFamilyPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  redirect(`/catalog/${slug}`);
+}

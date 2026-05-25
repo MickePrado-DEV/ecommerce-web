@@ -59,7 +59,7 @@ export function SidebarNav({
               onMouseEnter={() => onFamilyHover(f.id)}
             >
               <Link
-                href={`/families/${f.slug}`}
+                href={`/catalog/${f.slug}`}
                 className={activeFamilyId === f.id ? activeFamilyClass : linkClass}
                 onClick={() => {
                   onFamilyHover(f.id);

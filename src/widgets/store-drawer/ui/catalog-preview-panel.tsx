@@ -22,9 +22,15 @@ export function CatalogPreviewPanel({
     <div className="flex h-full min-h-0 flex-col">
       <div className="sticky top-0 z-10 border-b border-gray-800 bg-gray-950/90 pb-4 backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-bold text-white">{preview.familyName}</h2>
           <Link
-            href={`/families/${preview.familySlug}`}
+            href={`/catalog/${preview.familySlug}`}
+            onClick={onNavigate}
+            className="text-xl font-bold text-white hover:text-purple-300"
+          >
+            {preview.familyName}
+          </Link>
+          <Link
+            href="/catalog"
             onClick={onNavigate}
             className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
           >
@@ -38,7 +44,7 @@ export function CatalogPreviewPanel({
           {preview.categories.map((cat) => (
             <div key={cat.id}>
               <Link
-                href={`/categories/${cat.slug}`}
+                href={`/catalog/${preview.familySlug}/${cat.slug}`}
                 onClick={onNavigate}
                 className="text-lg font-semibold text-purple-400 hover:text-purple-300"
               >
@@ -49,7 +55,7 @@ export function CatalogPreviewPanel({
                   {cat.subCategories.map((sub) => (
                     <li key={sub.id}>
                       <Link
-                        href={`/subcategories/${sub.slug}`}
+                        href={`/catalog/${preview.familySlug}/${cat.slug}/${sub.slug}`}
                         onClick={onNavigate}
                         className="text-sm text-gray-400 hover:text-white"
                       >

@@ -35,7 +35,7 @@ export function CatalogDrawer() {
               {families?.map((f) => (
                 <div key={f.id}>
                   <Link
-                    href={`/families/${f.slug}`}
+                    href={`/catalog/${f.slug}`}
                     className="font-medium text-violet-400 hover:underline"
                     onClick={() => setOpen(false)}
                   >
@@ -44,7 +44,10 @@ export function CatalogDrawer() {
                   <ul className="mt-1 space-y-1 pl-3 text-zinc-400">
                     {f.categories.map((c) => (
                       <li key={c.id}>
-                        <Link href={`/categories/${c.slug}`} onClick={() => setOpen(false)}>
+                        <Link
+                          href={`/catalog/${f.slug}/${c.slug}`}
+                          onClick={() => setOpen(false)}
+                        >
                           {c.name}
                         </Link>
                       </li>
