@@ -96,6 +96,7 @@ export function AdminCoverFormPage() {
   const endPast = isEndDatePast(watched.endsAt ?? '');
   const wouldBeActive = watched.isActive && !endPast;
   const atActiveLimit = wouldBeActive && activeCount >= MAX_ACTIVE;
+  const willSaveInactive = atActiveLimit;
 
   const save = useMutation({
     mutationFn: (body: {
@@ -106,14 +107,23 @@ export function AdminCoverFormPage() {
       startsAt: string | null;
       endsAt: string | null;
     }) => adminApi.saveCover(body, isEdit ? id : undefined),
-    onSuccess: async () => {
+    onSuccess: async (_data, variables) => {
       await Promise.all([
         qc.invalidateQueries({ queryKey: queryKeys.adminCovers }),
         qc.invalidateQueries({ queryKey: ['admin', 'covers', 'paged'] }),
         qc.invalidateQueries({ queryKey: queryKeys.catalogHome }),
         ...(isEdit && id ? [qc.invalidateQueries({ queryKey: ['admin-cover', id] })] : []),
       ]);
-      toast.success(isEdit ? 'Cambios guardados' : 'Portada creada');
+      const forcedInactive = variables.isActive && activeCount >= MAX_ACTIVE;
+      if (forcedInactive) {
+        toast.success(
+          isEdit
+            ? 'Guardado. Ya hay 5 portadas activas; esta quedó inactiva.'
+            : 'Portada creada como inactiva (ya hay 5 activas en el home).',
+        );
+      } else {
+        toast.success(isEdit ? 'Cambios guardados' : 'Portada creada');
+      }
       router.push('/admin/covers');
     },
     onError: (e: Error) => toast.error(e.message),
@@ -140,11 +150,6 @@ export function AdminCoverFormPage() {
       toast.error('Selecciona una imagen para la portada.');
       return;
     }
-    if (atActiveLimit) {
-      toast.error(`Solo puede haber ${MAX_ACTIVE} portadas activas y vigentes.`);
-      return;
-    }
-
     save.mutate({
       title: d.title.trim(),
       imageUrl: d.imageUrl.trim(),
@@ -220,9 +225,10 @@ export function AdminCoverFormPage() {
                 La fecha fin ya pasó; se marcará como inactiva al guardar.
               </p>
             )}
-            {atActiveLimit && (
-              <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
-                Ya hay {MAX_ACTIVE} portadas activas. Desactiva otra antes de activar esta.
+            {willSaveInactive && (
+              <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
+                Ya hay {MAX_ACTIVE} portadas activas. Al guardar, esta quedará <strong>inactiva</strong> hasta
+                que desactives otra.
               </p>
             )}
             <div className="flex items-center justify-between rounded-xl border border-white/10 bg-zinc-900/50 p-4">
@@ -259,7 +265,7 @@ export function AdminCoverFormPage() {
               <Button
                 type="submit"
                 className="bg-violet-600 hover:bg-violet-500"
-                disabled={save.isPending || uploading || atActiveLimit}
+                disabled={save.isPending || uploading}
               >
                 {isEdit ? 'Guardar cambios' : 'Crear portada'}
               </Button>

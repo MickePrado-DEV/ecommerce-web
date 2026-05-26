@@ -3,8 +3,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { adminApi } from '@/entities/admin/api/admin-api';
-import { FAMILY_TABLE_CONFIG } from '@/entities/admin/config/family-table.config';
+import { FAMILY_TABLE_CONFIG } from '@/domain/families/family.table';
 import { useAdminTableQuery } from '@/features/admin/table/model/use-admin-table-query';
+import { useAdminFilterOptions } from '@/features/admin/table/model/use-admin-filter-options';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { PageHeader } from '@/shared/ui/page-header';
 import { Button } from '@/shared/ui/button';
@@ -19,6 +20,7 @@ export function AdminFamiliesPage() {
     tableConfig: FAMILY_TABLE_CONFIG,
     filterKeys: { name: 'name' },
   });
+  const filterOpts = useAdminFilterOptions(table.groupFilters);
 
   const del = useMutation({
     mutationFn: adminApi.deleteFamily,
@@ -47,9 +49,12 @@ export function AdminFamiliesPage() {
         paging={table.paging}
         sort={table.sort}
         filters={table.filters}
+        groupFilters={table.groupFilters}
+        filterOptions={filterOpts}
         onSort={table.onSort}
         onPageChange={table.onPageChange}
         onFilterChange={table.onFilterChange}
+        onGroupFiltersChange={table.onGroupFiltersChange}
         onRowAction={(actionId, row) => {
           if (actionId === 'delete') del.mutate(row.id);
         }}

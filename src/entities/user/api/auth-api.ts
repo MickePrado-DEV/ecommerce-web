@@ -1,6 +1,7 @@
 import { api } from '@/shared/api/client';
 import type {
   ChangePasswordRequest,
+  MandatoryChangePasswordRequest,
   LoginRequest,
   LoginResponse,
   RegisterCustomerRequest,
@@ -35,4 +36,7 @@ export const authApi = {
 
   changePassword: (body: ChangePasswordRequest) =>
     api<void>('/auth/change-password', { method: 'POST', body: JSON.stringify(body) }),
+
+  changePasswordMandatory: (body: MandatoryChangePasswordRequest) =>
+    api<void>('/auth/change-password/mandatory', { method: 'POST', body: JSON.stringify(body) }),
 };

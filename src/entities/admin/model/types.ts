@@ -30,6 +30,7 @@ export type PagedCategoriesAdminDto = PagedAdminResult<CategoryAdminRowDto>;
 export interface SubcategoryAdminRowDto {
   id: string;
   categoryId: string;
+  familyId: string;
   name: string;
   slug: string;
   sortOrder: number;
@@ -109,7 +110,21 @@ export interface DriverAdminDto {
   id: string;
   name: string;
   phone: string;
+  email?: string | null;
+  licenseNumber?: string | null;
+  vehicleType?: string | null;
+  vehiclePlate?: string | null;
+  notes?: string | null;
   isActive: boolean;
+  userId?: string | null;
+  loginEmail?: string | null;
+  hasLoginAccount?: boolean;
+  mustChangePassword?: boolean;
+  generatedTemporaryPassword?: string | null;
+}
+
+export interface DriverAccessCredentialsDto {
+  temporaryPassword: string;
 }
 
 export interface InventoryDto {

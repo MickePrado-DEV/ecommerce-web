@@ -47,9 +47,11 @@ function isPrincipal(c: CoverAdminDto) {
 
 function SortablePrincipalCard({
   cover,
+  displayOrder,
   onDelete,
 }: {
   cover: CoverAdminDto;
+  displayOrder: number;
   onDelete: (id: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -77,7 +79,7 @@ function SortablePrincipalCard({
         <GripVertical className="h-5 w-5 text-zinc-500" />
       </button>
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-600/20 text-sm font-semibold text-violet-300">
-        {cover.sortOrder}
+        {displayOrder}
       </span>
       <div className="h-16 w-28 shrink-0 overflow-hidden rounded-lg bg-zinc-800">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -133,7 +135,7 @@ export function AdminCoversPage() {
   const displayPrincipal = localPrincipal ?? principal;
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
@@ -172,12 +174,11 @@ export function AdminCoversPage() {
     const oldIndex = displayPrincipal.findIndex((c) => c.id === active.id);
     const newIndex = displayPrincipal.findIndex((c) => c.id === over.id);
     if (oldIndex < 0 || newIndex < 0) return;
-    const next = arrayMove(displayPrincipal, oldIndex, newIndex).map((c, i) => ({
-      ...c,
-      sortOrder: i + 1,
-    }));
+
+    const reordered = arrayMove(displayPrincipal, oldIndex, newIndex);
+    const next = reordered.map((c, i) => ({ ...c, sortOrder: i + 1 }));
     setLocalPrincipal(next);
-    reorder.mutate(next.map((c) => c.id));
+    reorder.mutate(reordered.map((c) => c.id));
   };
 
   const totalPages = paged ? Math.max(1, Math.ceil(paged.total / PAGE_SIZE)) : 1;
@@ -213,8 +214,13 @@ export function AdminCoversPage() {
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-3">
-                {displayPrincipal.map((c) => (
-                  <SortablePrincipalCard key={c.id} cover={c} onDelete={(id) => del.mutate(id)} />
+                {displayPrincipal.map((c, index) => (
+                  <SortablePrincipalCard
+                    key={c.id}
+                    cover={c}
+                    displayOrder={index + 1}
+                    onDelete={(id) => del.mutate(id)}
+                  />
                 ))}
               </div>
             </SortableContext>

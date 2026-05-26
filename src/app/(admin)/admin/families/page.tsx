@@ -3,7 +3,7 @@ import { AdminFamiliesPage } from '@/views/admin/families/ui/admin-families-page
 import { adminServerApi } from '@/shared/api/server-api';
 import { parseAdminTableSearchParams } from '@/shared/lib/admin-table-url';
 import { queryKeys } from '@/shared/lib/query-keys';
-import { FAMILY_TABLE_CONFIG } from '@/entities/admin/config/family-table.config';
+import { FAMILY_TABLE_CONFIG } from '@/domain/families/family.table';
 import { getDefaultPageSize } from '@/widgets/admin/data-table/lib/table-data';
 
 export default async function Page({

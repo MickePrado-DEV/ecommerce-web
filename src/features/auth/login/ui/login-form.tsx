@@ -16,7 +16,7 @@ import Link from 'next/link';
 
 const schema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(1),
 });
 
 export function LoginForm() {
@@ -28,11 +28,28 @@ export function LoginForm() {
   const onSubmit = form.handleSubmit(async (data) => {
     try {
       const res = await authApi.login(data);
-      setSession(res.user, res.permissions, res.accessToken, res.refreshToken);
+      const mustChange = Boolean(res.requiresPasswordChange || res.user.mustChangePassword);
+      setSession(res.user, res.permissions, res.accessToken, res.refreshToken, mustChange);
       const guest = localStorage.getItem('guestToken');
       if (guest) await cartApi.merge(guest);
+
+      if (mustChange && res.user.roles.includes('driver')) {
+        toast.info('Debes cambiar tu contraseña temporal antes de continuar.');
+        router.push('/driver/change-password');
+        return;
+      }
+
       toast.success('Bienvenido');
-      router.push(params.get('redirect') ?? '/');
+      const redirect = params.get('redirect');
+      if (redirect) {
+        router.push(redirect);
+      } else if (res.user.roles.includes('driver')) {
+        router.push('/driver');
+      } else if (res.user.roles.some((r) => r === 'admin' || r.startsWith('admin'))) {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/');
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Error de login');
     }

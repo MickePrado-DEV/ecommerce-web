@@ -1,10 +1,9 @@
 import type { AdminTableConfig } from '@/shared/types/admin-table-config';
 import type { FamilyAdminDto } from '@/entities/admin/model/types';
 
+/** Configuración de tabla Admin — Familias (dominio). */
 export const FAMILY_TABLE_CONFIG: AdminTableConfig<FamilyAdminDto> = {
   tableId: 'admin-families',
-  variant: 'default',
-  density: 'comfortable',
   frozen: { left: 1 },
   defaultSort: { key: 'name', direction: 'asc' },
   pagination: {
@@ -22,20 +21,53 @@ export const FAMILY_TABLE_CONFIG: AdminTableConfig<FamilyAdminDto> = {
     {
       key: 'id',
       header: 'ID',
-      type: 'text',
       sortable: true,
       fit: true,
-      width: 120,
+      width: 100,
       value: (row) => row.id.slice(0, 8),
       cellClassName: 'font-mono text-xs text-zinc-500',
     },
     {
       key: 'name',
       header: 'Nombre',
-      type: 'text',
       sortable: true,
       searchable: true,
       filter: { mode: 'contains', placeholder: 'Buscar nombre…' },
+    },
+  ],
+  filterGroups: [
+    {
+      id: 'initial',
+      label: 'Inicial',
+      field: 'nameInitial',
+      mode: 'multi',
+      type: 'checkbox',
+      operator: 'in',
+      optionsSource: {
+        kind: 'static',
+        options: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map((ch) => ({
+          label: ch,
+          value: ch,
+        })),
+      },
+      layout: 'chips',
+    },
+    {
+      id: 'id-range',
+      label: 'Rango orden',
+      field: 'idBucket',
+      mode: 'multi',
+      type: 'checkbox',
+      operator: 'in',
+      optionsSource: {
+        kind: 'static',
+        options: [
+          { label: '1 – 50', value: '1-50' },
+          { label: '51 – 100', value: '51-100' },
+          { label: '101 – 200', value: '101-200' },
+          { label: '201+', value: '201-9999' },
+        ],
+      },
     },
   ],
   actions: [
@@ -43,7 +75,6 @@ export const FAMILY_TABLE_CONFIG: AdminTableConfig<FamilyAdminDto> = {
       id: 'edit',
       label: 'Editar',
       icon: 'edit',
-      variant: 'outline',
       href: (row) => `/admin/families/${row.id}/edit`,
     },
     {
@@ -51,7 +82,7 @@ export const FAMILY_TABLE_CONFIG: AdminTableConfig<FamilyAdminDto> = {
       label: 'Eliminar',
       icon: 'delete',
       variant: 'danger',
-      event: 'click',
+      emit: 'delete',
     },
   ],
 };

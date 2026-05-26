@@ -3,7 +3,7 @@ import { AdminCategoriesPage } from '@/views/admin/categories/ui/admin-categorie
 import { adminServerApi } from '@/shared/api/server-api';
 import { parseAdminTableSearchParams } from '@/shared/lib/admin-table-url';
 import { queryKeys } from '@/shared/lib/query-keys';
-import { CATEGORY_TABLE_CONFIG } from '@/entities/admin/config/category-table.config';
+import { CATEGORY_TABLE_CONFIG } from '@/domain/categories/category.table';
 import { getDefaultPageSize } from '@/widgets/admin/data-table/lib/table-data';
 
 export default async function Page({

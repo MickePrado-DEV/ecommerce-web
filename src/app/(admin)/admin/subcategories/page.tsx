@@ -3,7 +3,7 @@ import { AdminSubcategoriesPage } from '@/views/admin/subcategories/ui/admin-sub
 import { adminServerApi } from '@/shared/api/server-api';
 import { parseAdminTableSearchParams } from '@/shared/lib/admin-table-url';
 import { queryKeys } from '@/shared/lib/query-keys';
-import { SUBCATEGORY_TABLE_CONFIG } from '@/entities/admin/config/subcategory-table.config';
+import { SUBCATEGORY_TABLE_CONFIG } from '@/domain/subcategories/subcategory.table';
 import { getDefaultPageSize } from '@/widgets/admin/data-table/lib/table-data';
 
 export default async function Page({

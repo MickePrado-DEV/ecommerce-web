@@ -8,7 +8,9 @@ import type { AdminTableQueryParams } from '@/shared/lib/admin-table-url';
 import {
   adminTableParamsToQueryString,
   filtersFromParams,
+  groupFiltersFromParams,
   paramsFromFilters,
+  paramsFromGroupFilters,
   parseAdminTableSearchParams,
   sortStateFromParams,
 } from '@/shared/lib/admin-table-url';
@@ -37,7 +39,7 @@ export function useAdminTableQuery<T extends object>({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const defaultPageSize = getDefaultPageSize(tableConfig as AdminTableConfig<unknown>);
+  const defaultPageSize = getDefaultPageSize(tableConfig);
 
   const params = useMemo(
     () => parseAdminTableSearchParams(searchParams, defaultPageSize),
@@ -45,6 +47,8 @@ export function useAdminTableQuery<T extends object>({
   );
 
   const filterDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const groupDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const quickDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const replaceParams = useCallback(
     (next: AdminTableQueryParams) => {
@@ -63,24 +67,24 @@ export function useAdminTableQuery<T extends object>({
     refetchOnWindowFocus: false,
   });
 
-  const paging = {
-    page: query.data?.page ?? params.page,
-    pageSize: query.data?.pageSize ?? params.pageSize,
-    total: query.data?.total ?? 0,
-  };
-
-  const sort = sortStateFromParams(params);
-  const filters = filtersFromParams(params, filterKeys);
+  const groupFilters = groupFiltersFromParams(params);
 
   return {
     data: query.data?.items ?? [],
-    paging,
-    sort,
-    filters,
+    paging: {
+      page: query.data?.page ?? params.page,
+      pageSize: query.data?.pageSize ?? params.pageSize,
+      total: query.data?.total ?? 0,
+    },
+    sort: sortStateFromParams(params),
+    filters: filtersFromParams(params, filterKeys),
+    groupFilters,
+    quickSearch: params.search,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
+    isError: query.isError,
+    error: query.error,
     params,
-    replaceParams,
     onSort: (next: AdminTableSortState) => {
       replaceParams({
         ...params,
@@ -96,6 +100,18 @@ export function useAdminTableQuery<T extends object>({
       if (filterDebounceRef.current) clearTimeout(filterDebounceRef.current);
       filterDebounceRef.current = setTimeout(() => {
         replaceParams(paramsFromFilters(params, nextFilters, filterKeys));
+      }, 350);
+    },
+    onGroupFiltersChange: (next: typeof groupFilters) => {
+      if (groupDebounceRef.current) clearTimeout(groupDebounceRef.current);
+      groupDebounceRef.current = setTimeout(() => {
+        replaceParams(paramsFromGroupFilters(params, next));
+      }, 300);
+    },
+    onQuickSearchChange: (value: string) => {
+      if (quickDebounceRef.current) clearTimeout(quickDebounceRef.current);
+      quickDebounceRef.current = setTimeout(() => {
+        replaceParams({ ...params, page: 1, search: value });
       }, 350);
     },
   };

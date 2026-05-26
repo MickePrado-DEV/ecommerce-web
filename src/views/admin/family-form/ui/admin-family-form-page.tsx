@@ -11,6 +11,16 @@ import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
 import { toast } from 'sonner';
 
+function slugFromName(name: string) {
+  return name
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
 export function AdminFamilyFormPage() {
   const id = useParams().id as string | undefined;
   const router = useRouter();
@@ -29,14 +39,30 @@ export function AdminFamilyFormPage() {
   });
 
   return (
-    <div>
+    <div className="mx-auto w-full max-w-lg px-4">
       <PageHeader title={isEdit ? 'Editar familia' : 'Nueva familia'} />
-      <form onSubmit={form.handleSubmit((d) => save.mutate(d))} className="max-w-md space-y-4">
-        <div><Label>Nombre</Label><Input {...form.register('name')} /></div>
-        <div><Label>Slug</Label><Input {...form.register('slug')} /></div>
-        <div><Label>Orden</Label><Input type="number" {...form.register('sortOrder', { valueAsNumber: true })} /></div>
-        <label className="flex items-center gap-2 text-sm"><input type="checkbox" {...form.register('isActive')} /> Activa</label>
-        <Button type="submit">Guardar</Button>
+      <form
+        onSubmit={form.handleSubmit((d) => {
+          if (!d.name.trim()) {
+            toast.error('El nombre es obligatorio');
+            return;
+          }
+          save.mutate({
+            ...d,
+            slug: d.slug || slugFromName(d.name),
+            sortOrder: d.sortOrder ?? 0,
+            isActive: d.isActive ?? true,
+          });
+        })}
+        className="space-y-4 rounded-xl border border-white/10 bg-zinc-900/40 p-6"
+      >
+        <div>
+          <Label>Nombre</Label>
+          <Input {...form.register('name', { required: true })} />
+        </div>
+        <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-500" disabled={save.isPending}>
+          Guardar
+        </Button>
       </form>
     </div>
   );

@@ -9,10 +9,11 @@ import type {
   AdminTableConfig,
   AdminTablePagingState,
   AdminTableSortState,
+  FilterOption,
+  GroupFiltersState,
   SortDirection,
   TableActionIcon,
 } from '@/shared/types/admin-table-config';
-import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { cn } from '@/shared/lib/utils';
 import {
@@ -20,15 +21,27 @@ import {
   formatCellValue,
   getCellValue,
 } from '@/widgets/admin/data-table/lib/table-data';
+import { TablePagination } from '@/widgets/admin/data-table/ui/table-pagination';
+import { AdminTableFilterBar } from '@/widgets/admin/data-table/ui/admin-table-filter-bar';
+import {
+  AdminTableColumnFilter,
+  columnHasFilter,
+  getColumnFilterUi,
+} from '@/widgets/admin/data-table/ui/admin-table-column-filter';
 
 export interface AdminDataTableProps<TRow extends object>
   extends AdminDataTableEvents<TRow> {
   data: TRow[];
   tableConfig: AdminTableConfig<TRow>;
   loading?: boolean;
+  /** Mensaje si falló la carga (p. ej. error 400/500 del API) */
+  fetchError?: string | null;
   paging: AdminTablePagingState;
   sort?: AdminTableSortState | null;
   filters?: Record<string, string>;
+  groupFilters?: GroupFiltersState;
+  filterOptions?: Record<string, FilterOption[]>;
+  quickSearch?: string;
 }
 
 function nextSortDirection(current: SortDirection | null): SortDirection | null {
@@ -49,47 +62,6 @@ function ActionIcon({ icon }: { icon?: TableActionIcon }) {
   return null;
 }
 
-function TablePagination({
-  page,
-  pageSize,
-  total,
-  onPageChange,
-}: {
-  page: number;
-  pageSize: number;
-  total: number;
-  onPageChange: (page: number) => void;
-}) {
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  return (
-    <div className="mt-4 flex items-center justify-between text-sm text-zinc-400">
-      <span>
-        Página {page} de {totalPages} ({total} total)
-      </span>
-      <div className="flex gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          className="min-w-9 px-3"
-          disabled={page <= 1}
-          onClick={() => onPageChange(page - 1)}
-        >
-          Anterior
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          className="min-w-9 px-3"
-          disabled={page >= totalPages}
-          onClick={() => onPageChange(page + 1)}
-        >
-          Siguiente
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 function renderAction<TRow extends object>(
   action: AdminTableActionDef<TRow>,
   row: TRow,
@@ -102,7 +74,7 @@ function renderAction<TRow extends object>(
         key={action.id}
         size="sm"
         variant="outline"
-        className="h-8 w-8 p-0"
+        className="h-8 w-8 border-sky-500/30 p-0 text-sky-400 hover:bg-sky-500/10 hover:text-sky-300"
         asChild
         title={action.label}
       >
@@ -117,10 +89,7 @@ function renderAction<TRow extends object>(
       key={action.id}
       size="sm"
       variant="ghost"
-      className={cn(
-        'h-8 w-8 p-0',
-        action.variant === 'danger' && 'text-red-400 hover:text-red-300',
-      )}
+      className="h-8 w-8 p-0 text-red-400 hover:bg-red-500/10 hover:text-red-300"
       title={action.label}
       aria-label={action.label}
       onClick={(e) => {
@@ -137,19 +106,31 @@ export function AdminDataTable<TRow extends object>({
   data,
   tableConfig,
   loading = false,
+  fetchError = null,
   paging,
   sort = null,
   filters = {},
+  groupFilters = {},
+  filterOptions = {},
+  quickSearch = '',
   onSort,
   onPageChange,
   onFilterChange,
+  onGroupFiltersChange,
+  onQuickSearchChange,
   onRowAction,
   onRowClick,
 }: AdminDataTableProps<TRow>) {
   const paginationEnabled = tableConfig.pagination?.enabled ?? false;
   const columns = tableConfig.columns;
   const hasActions = (tableConfig.actions?.length ?? 0) > 0;
-  const hasSearchable = columns.some((c) => c.searchable);
+  const hasFilterRow = columns.some((c) => columnHasFilter(c.filter, c.searchable));
+
+  const resolveOptions = (loaderKey: string) => filterOptions[loaderKey] ?? [];
+
+  const handleColumnMultiChange = (field: string, values: string[]) => {
+    onGroupFiltersChange?.({ ...groupFilters, [field]: values });
+  };
   const frozenLeft = tableConfig.frozen?.left ?? 0;
   const leftOffsets = buildStickyOffsets(columns, frozenLeft);
   const density = tableConfig.density ?? 'comfortable';
@@ -180,24 +161,24 @@ export function AdminDataTable<TRow extends object>({
     />
   ) : null;
 
-  if (loading && !data.length) {
-    const skeletonRows = tableConfig.loadingRows ?? 5;
-    return (
-      <div data-table-id={tableConfig.tableId}>
-        <div className="overflow-hidden rounded-xl border border-white/10">
-          <div className="animate-pulse space-y-2 p-4">
-            {Array.from({ length: skeletonRows }).map((_, i) => (
-              <div key={i} className="h-10 rounded bg-zinc-800/80" />
-            ))}
-          </div>
-        </div>
-        {pagination}
-      </div>
-    );
-  }
-
   return (
     <div data-table-id={tableConfig.tableId}>
+      {(tableConfig.filterGroups?.length || tableConfig.quickSearch?.enabled) && (
+        <AdminTableFilterBar
+          groups={tableConfig.filterGroups ?? []}
+          value={groupFilters}
+          optionsByLoader={filterOptions}
+          quickSearch={
+            tableConfig.quickSearch?.enabled
+              ? { placeholder: tableConfig.quickSearch.placeholder }
+              : undefined
+          }
+          quickSearchValue={quickSearch}
+          onQuickSearchChange={onQuickSearchChange}
+          onChange={(next) => onGroupFiltersChange?.(next)}
+        />
+      )}
+
       <div className="overflow-x-auto rounded-xl border border-white/10">
         <table className="w-full min-w-max text-left text-sm">
           <thead>
@@ -238,43 +219,77 @@ export function AdminDataTable<TRow extends object>({
                 </th>
               )}
             </tr>
-            {hasSearchable && (
+            {hasFilterRow && (
               <tr className="border-b border-white/10 bg-zinc-950/80">
-                {columns.map((col, index) => (
-                  <th
-                    key={`filter-${col.key}`}
-                    style={stickyCell(index)}
-                    className={cn(cellPad, col.fit && 'w-0')}
-                  >
-                    {col.searchable ? (
-                      <Input
-                        placeholder={col.filter?.placeholder ?? `Buscar ${col.header.toLowerCase()}…`}
-                        value={filters[col.key] ?? ''}
-                        onChange={(e) =>
-                          onFilterChange?.({ ...filters, [col.key]: e.target.value })
-                        }
-                        className="h-8 text-xs"
-                      />
-                    ) : null}
-                  </th>
-                ))}
+                {columns.map((col, index) => {
+                  const showFilter = columnHasFilter(col.filter, col.searchable);
+                  const isMulti =
+                    showFilter &&
+                    getColumnFilterUi(col.filter) === 'multi-select' &&
+                    col.filter?.field &&
+                    col.filter.optionsSource;
+
+                  const multiOptions =
+                    isMulti && col.filter?.optionsSource?.kind === 'remote'
+                      ? resolveOptions(col.filter.optionsSource.loaderKey)
+                      : isMulti && col.filter?.optionsSource?.kind === 'static'
+                        ? col.filter.optionsSource.options
+                        : [];
+
+                  return (
+                    <th
+                      key={`filter-${col.key}`}
+                      style={stickyCell(index)}
+                      className={cn(cellPad, col.fit && 'w-0')}
+                    >
+                      {showFilter ? (
+                        <AdminTableColumnFilter
+                          filter={col.filter}
+                          searchable={col.searchable}
+                          textValue={filters[col.key] ?? ''}
+                          selected={
+                            isMulti && col.filter?.field
+                              ? (groupFilters[col.filter.field] ?? [])
+                              : []
+                          }
+                          options={multiOptions}
+                          onTextChange={(value) =>
+                            onFilterChange?.({ ...filters, [col.key]: value })
+                          }
+                          onMultiChange={(values) =>
+                            col.filter?.field &&
+                            handleColumnMultiChange(col.filter.field, values)
+                          }
+                        />
+                      ) : null}
+                    </th>
+                  );
+                })}
                 {hasActions && <th className={cellPad} />}
               </tr>
             )}
           </thead>
           <tbody>
-            {data.length === 0 ? (
+            {loading && !data.length ? (
+              Array.from({ length: tableConfig.loadingRows ?? 5 }).map((_, i) => (
+                <tr key={i} className="border-b border-white/5">
+                  <td colSpan={columns.length + (hasActions ? 1 : 0)} className={cellPad}>
+                    <div className="h-9 animate-pulse rounded bg-zinc-800/80" />
+                  </td>
+                </tr>
+              ))
+            ) : data.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length + (hasActions ? 1 : 0)}
                   className="p-8 text-center text-zinc-500"
                 >
                   <p className="font-medium text-zinc-300">
-                    {tableConfig.emptyState?.title ?? 'Sin registros'}
+                    {fetchError ? 'Error al cargar datos' : (tableConfig.emptyState?.title ?? 'Sin registros')}
                   </p>
-                  {tableConfig.emptyState?.description && (
-                    <p className="mt-1 text-sm">{tableConfig.emptyState.description}</p>
-                  )}
+                  <p className="mt-1 text-sm">
+                    {fetchError ?? tableConfig.emptyState?.description}
+                  </p>
                 </td>
               </tr>
             ) : (

@@ -6,6 +6,7 @@ export interface UserDto {
   roles: string[];
   driverId?: string | null;
   phone?: string | null;
+  mustChangePassword?: boolean;
 }
 
 export interface LoginResponse {
@@ -13,6 +14,7 @@ export interface LoginResponse {
   refreshToken: string;
   user: UserDto;
   permissions: string[];
+  requiresPasswordChange?: boolean;
 }
 
 export interface LoginRequest {
@@ -41,5 +43,9 @@ export interface UpdateProfileRequest {
 
 export interface ChangePasswordRequest {
   currentPassword: string;
+  newPassword: string;
+}
+
+export interface MandatoryChangePasswordRequest {
   newPassword: string;
 }

@@ -7,6 +7,7 @@ import type {
   CategoryAdminDto,
   CoverAdminDto,
   PagedCoversAdminDto,
+  DriverAccessCredentialsDto,
   DriverAdminDto,
   FamilyAdminDto,
   PagedCategoriesAdminDto,
@@ -175,6 +176,10 @@ export const adminApi = {
       ? api<DriverAdminDto>(`/admin/drivers/${id}`, { method: 'PUT', body: JSON.stringify(body) })
       : api<DriverAdminDto>('/admin/drivers', { method: 'POST', body: JSON.stringify(body) }),
   deleteDriver: (id: string) => api<void>(`/admin/drivers/${id}`, { method: 'DELETE' }),
+  setDriverTemporaryPassword: (id: string) =>
+    api<DriverAccessCredentialsDto>(`/admin/drivers/${id}/temporary-password`, {
+      method: 'PUT',
+    }),
 
   // Users
   listUsers: (page = 1, pageSize = 20, search?: string) => {

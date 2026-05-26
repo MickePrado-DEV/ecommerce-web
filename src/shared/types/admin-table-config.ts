@@ -8,10 +8,30 @@ export type PaginationMode = 'server' | 'client';
 export type FilterMode = 'contains' | 'equals' | 'startsWith' | 'range' | 'dateRange';
 export type ActionVariant = 'primary' | 'danger' | 'ghost' | 'outline';
 export type TableActionIcon = 'edit' | 'delete' | 'view';
+export type FilterGroupMode = 'multi' | 'single';
+export type FilterGroupType = 'checkbox' | 'radio';
+export type FilterOperator = 'in' | 'eq';
+export type FilterOptionsSource =
+  | { kind: 'static'; options: FilterOption[] }
+  | { kind: 'remote'; loaderKey: string };
+
+export interface FilterOption {
+  label: string;
+  value: string;
+}
+
+/** UI del filtro en la fila bajo el header de la columna */
+export type ColumnFilterUi = 'input' | 'multi-select';
 
 export interface ColumnFilterConfig {
-  mode: FilterMode;
+  /** Por defecto: `input` si solo hay `searchable`; usa `multi-select` para checkbox en celda */
+  ui?: ColumnFilterUi;
+  mode?: FilterMode;
   placeholder?: string;
+  /** Multi-select: campo de filtro servidor (`familyId` → `familyIds` en URL) */
+  field?: string;
+  optionsSource?: FilterOptionsSource;
+  searchableInOptions?: boolean;
 }
 
 export interface AdminTableColumnDef<TRow> {
@@ -36,11 +56,29 @@ export interface AdminTableActionDef<TRow> {
   label: string;
   icon?: TableActionIcon;
   variant?: ActionVariant;
-  /** Enlace de navegación (p. ej. editar). */
   href?: (row: TRow) => string;
-  /** Botón que emite onRowAction. */
+  emit?: string;
   event?: 'click';
   visible?: (row: TRow) => boolean;
+}
+
+export interface AdminTableFilterGroupDef {
+  id: string;
+  label: string;
+  field: string;
+  mode?: FilterGroupMode;
+  type?: FilterGroupType;
+  operator?: FilterOperator;
+  optionsSource: FilterOptionsSource;
+  searchableInOptions?: boolean;
+  layout?: 'inline' | 'stack' | 'chips';
+  defaultValue?: string[] | string;
+}
+
+export interface AdminTableQuickSearchDef {
+  enabled: boolean;
+  placeholder?: string;
+  fields: string[];
 }
 
 export interface AdminTableFrozenConfig {
@@ -68,6 +106,8 @@ export interface AdminTableConfig<TRow> {
   columns: AdminTableColumnDef<TRow>[];
   defaultSort?: { key: string; direction: SortDirection };
   actions?: AdminTableActionDef<TRow>[];
+  filterGroups?: AdminTableFilterGroupDef[];
+  quickSearch?: AdminTableQuickSearchDef;
   rowClick?: { enabled: boolean };
   selectable?: boolean;
   pagination?: AdminTablePaginationConfig;
@@ -86,10 +126,15 @@ export interface AdminTablePagingState {
   total: number;
 }
 
+/** Valores de grupos de filtro: field -> lista de values seleccionados */
+export type GroupFiltersState = Record<string, string[]>;
+
 export interface AdminDataTableEvents<TRow> {
   onSort?: (sort: AdminTableSortState) => void;
   onPageChange?: (page: number, pageSize: number) => void;
   onFilterChange?: (filters: Record<string, string>) => void;
+  onGroupFiltersChange?: (filters: GroupFiltersState) => void;
+  onQuickSearchChange?: (value: string) => void;
   onRowAction?: (actionId: string, row: TRow) => void;
   onRowClick?: (row: TRow) => void;
 }

@@ -1,10 +1,9 @@
 import type { AdminTableConfig } from '@/shared/types/admin-table-config';
 import type { CategoryAdminRowDto } from '@/entities/admin/model/types';
 
+/** Configuración de tabla Admin — Categorías (dominio). */
 export const CATEGORY_TABLE_CONFIG: AdminTableConfig<CategoryAdminRowDto> = {
   tableId: 'admin-categories',
-  variant: 'default',
-  density: 'comfortable',
   frozen: { left: 1 },
   defaultSort: { key: 'name', direction: 'asc' },
   pagination: {
@@ -13,37 +12,44 @@ export const CATEGORY_TABLE_CONFIG: AdminTableConfig<CategoryAdminRowDto> = {
     pageSizeOptions: [10, 20, 50],
     defaultPageSize: 10,
   },
+  quickSearch: {
+    enabled: true,
+    placeholder: 'Buscar categorías (ej. televisores)…',
+    fields: ['name'],
+  },
   emptyState: {
     title: 'No hay categorías',
-    description: 'Crea una categoría o revisa los filtros aplicados.',
+    description: 'Ajusta filtros o crea una categoría nueva.',
   },
   loadingRows: 6,
   columns: [
     {
       key: 'id',
       header: 'ID',
-      type: 'text',
       sortable: true,
       fit: true,
-      width: 120,
+      width: 100,
       value: (row) => row.id.slice(0, 8),
       cellClassName: 'font-mono text-xs text-zinc-500',
     },
     {
       key: 'name',
       header: 'Nombre',
-      type: 'text',
       sortable: true,
-      searchable: true,
-      filter: { mode: 'contains', placeholder: 'Buscar nombre…' },
+      filter: { ui: 'input', mode: 'contains', placeholder: 'Buscar nombre…' },
     },
     {
       key: 'familyName',
       header: 'Familia',
-      type: 'text',
       sortable: true,
-      searchable: true,
-      filter: { mode: 'contains', placeholder: 'Buscar familia…' },
+      // ui: 'input' + placeholder 'Buscar familia…' para filtro por texto (familyName)
+      filter: {
+        ui: 'multi-select',
+        field: 'familyId',
+        placeholder: 'Familia…',
+        optionsSource: { kind: 'remote', loaderKey: 'families' },
+        searchableInOptions: true,
+      },
     },
   ],
   actions: [
@@ -51,7 +57,6 @@ export const CATEGORY_TABLE_CONFIG: AdminTableConfig<CategoryAdminRowDto> = {
       id: 'edit',
       label: 'Editar',
       icon: 'edit',
-      variant: 'outline',
       href: (row) => `/admin/categories/${row.id}/edit`,
     },
     {
@@ -59,7 +64,7 @@ export const CATEGORY_TABLE_CONFIG: AdminTableConfig<CategoryAdminRowDto> = {
       label: 'Eliminar',
       icon: 'delete',
       variant: 'danger',
-      event: 'click',
+      emit: 'delete',
     },
   ],
 };
