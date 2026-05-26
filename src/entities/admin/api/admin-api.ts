@@ -4,6 +4,7 @@ import type { OrderDetailDto, PagedOrdersDto } from '@/entities/order/model/type
 import type {
   CategoryAdminDto,
   CoverAdminDto,
+  PagedCoversAdminDto,
   DriverAdminDto,
   FamilyAdminDto,
   PagedUsersAdminDto,
@@ -31,6 +32,8 @@ export const adminApi = {
 
   // Covers
   listCovers: () => api<CoverAdminDto[]>('/admin/covers'),
+  listCoversPaged: (page = 1, pageSize = 10) =>
+    api<PagedCoversAdminDto>(`/admin/covers/paged?page=${page}&pageSize=${pageSize}`),
   getCover: (id: string) => api<CoverAdminDto>(`/admin/covers/${id}`),
   saveCover: (body: unknown, id?: string) =>
     id
@@ -39,6 +42,29 @@ export const adminApi = {
   deleteCover: (id: string) => api<void>(`/admin/covers/${id}`, { method: 'DELETE' }),
   reorderCovers: (ids: string[]) =>
     api<void>('/admin/covers/reorder', { method: 'PATCH', body: JSON.stringify({ ids }) }),
+  uploadCoverImage: async (file: File): Promise<{ url: string }> => {
+    const form = new FormData();
+    form.append('file', file);
+    const headers: Record<string, string> = {};
+    if (typeof window !== 'undefined') {
+      const token = sessionStorage.getItem('accessToken');
+      if (token) headers.Authorization = `Bearer ${token}`;
+    }
+    const res = await fetch(`${env.apiUrl}/admin/covers/upload`, {
+      method: 'POST',
+      headers,
+      body: form,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      const msg =
+        typeof body === 'object' && body && 'message' in body && typeof body.message === 'string'
+          ? body.message
+          : res.statusText;
+      throw new Error(msg);
+    }
+    return res.json() as Promise<{ url: string }>;
+  },
 
   // Catalog
   listFamilies: () => api<FamilyAdminDto[]>('/admin/catalog/families'),

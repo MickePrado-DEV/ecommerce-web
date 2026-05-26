@@ -13,6 +13,7 @@ export const queryKeys = {
   me: ['auth', 'me'] as const,
   adminDashboard: ['admin', 'dashboard'] as const,
   adminCovers: ['admin', 'covers'] as const,
+  adminCoversPaged: (page: number) => ['admin', 'covers', 'paged', page] as const,
   adminFamilies: ['admin', 'families'] as const,
   adminProducts: (page: number) => ['admin', 'products', page] as const,
   adminInventory: ['admin', 'inventory'] as const,

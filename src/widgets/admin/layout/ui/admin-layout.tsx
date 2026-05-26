@@ -2,9 +2,9 @@
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-zinc-950">
+    <div className="flex h-dvh overflow-hidden bg-zinc-950">
       <AdminSidebar />
-      <main className="flex-1 overflow-auto p-8">{children}</main>
+      <main className="min-h-0 flex-1 overflow-y-auto p-8">{children}</main>
     </div>
   );
 }

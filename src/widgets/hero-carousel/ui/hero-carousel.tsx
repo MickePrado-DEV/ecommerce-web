@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { CoverDto } from '@/entities/catalog/model/types';
+import { resolveMediaUrl } from '@/shared/lib/media-url';
 import { Button } from '@/shared/ui/button';
 
 const FALLBACK_SLIDES = [
@@ -44,7 +45,7 @@ function toSlides(covers: CoverDto[]): Slide[] {
     id: c.id,
     title: c.title,
     subtitle: 'Explora las novedades más recientes de nuestro catálogo.',
-    imageUrl: c.imageUrl,
+    imageUrl: resolveMediaUrl(c.imageUrl),
     linkUrl: c.linkUrl ?? '/search',
   }));
 }

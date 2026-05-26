@@ -50,6 +50,16 @@ export interface CoverAdminDto {
   linkUrl?: string | null;
   sortOrder: number;
   isActive: boolean;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  isEffectivelyActive: boolean;
+}
+
+export interface PagedCoversAdminDto {
+  items: CoverAdminDto[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface ShipmentSummaryDto {

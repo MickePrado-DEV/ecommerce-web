@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/entities/user/model/auth-store';
+import { LogoutButton } from '@/features/auth/logout/ui/logout-button';
 import {
   adminNavSections,
   isNavLinkActive,
@@ -13,15 +14,16 @@ import { cn } from '@/shared/lib/utils';
 export function AdminSidebar() {
   const pathname = usePathname();
   const hasPermission = useAuthStore((s) => s.hasPermission);
+  const user = useAuthStore((s) => s.user);
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-white/10 bg-zinc-900">
-      <div className="border-b border-white/10 p-4">
+    <aside className="flex h-dvh w-64 shrink-0 flex-col overflow-hidden border-r border-white/10 bg-zinc-900">
+      <div className="shrink-0 border-b border-white/10 p-4">
         <Link href="/admin/dashboard" className="text-lg font-bold text-violet-400">
           Admin
         </Link>
       </div>
-      <nav className="flex-1 overflow-y-auto p-3">
+      <nav className="min-h-0 flex-1 overflow-y-auto p-3">
         {adminNavSections.map((section, idx) => {
           const visibleLinks = section.links.filter((link) => hasPermission(link.permission));
           if (!visibleLinks.length) return null;
@@ -79,10 +81,20 @@ export function AdminSidebar() {
           );
         })}
       </nav>
-      <div className="border-t border-white/10 p-4">
-        <Link href="/" className="text-sm text-zinc-500 transition hover:text-zinc-300">
-          ← Volver a tienda
-        </Link>
+      <div className="shrink-0 space-y-3 border-t border-white/10 p-4">
+        {user && (
+          <div className="truncate text-xs text-zinc-400" title={user.email}>
+            {user.firstName} {user.lastName}
+            <br />
+            <span className="text-zinc-500">{user.email}</span>
+          </div>
+        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <LogoutButton className="text-zinc-400 hover:text-white" />
+          <Link href="/" className="text-sm text-zinc-500 transition hover:text-zinc-300">
+            ← Tienda
+          </Link>
+        </div>
       </div>
     </aside>
   );
