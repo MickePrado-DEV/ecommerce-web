@@ -1,48 +1,59 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
-import { catalogApi } from '@/entities/catalog/api/catalog-api';
+import { adminApi } from '@/entities/admin/api/admin-api';
+import { CATEGORY_TABLE_CONFIG } from '@/entities/admin/config/category-table.config';
+import { useAdminTableQuery } from '@/features/admin/table/model/use-admin-table-query';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { PageHeader } from '@/shared/ui/page-header';
 import { Button } from '@/shared/ui/button';
+import { AdminDataTable } from '@/widgets/admin/data-table/ui/admin-data-table';
+import { toast } from 'sonner';
 
 export function AdminCategoriesPage() {
-  const { data: families, isLoading } = useQuery({
-    queryKey: queryKeys.families,
-    queryFn: catalogApi.getFamilies,
+  const qc = useQueryClient();
+  const table = useAdminTableQuery({
+    queryKey: queryKeys.adminCategoriesTable,
+    fetchPage: adminApi.listCategoriesPaged,
+    tableConfig: CATEGORY_TABLE_CONFIG,
+    filterKeys: { name: 'name', familyName: 'familyName' },
   });
 
-  const rows =
-    families?.flatMap((f) =>
-      f.categories.map((c) => ({ ...c, familyName: f.name })),
-    ) ?? [];
-
-  if (isLoading) return <p>Cargando…</p>;
+  const del = useMutation({
+    mutationFn: adminApi.deleteCategory,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin', 'categories', 'table'] });
+      qc.invalidateQueries({ queryKey: queryKeys.families });
+      toast.success('Categoría eliminada');
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   return (
     <div>
-      <PageHeader title="Categorías" action={<Button asChild><Link href="/admin/categories/new">Nueva</Link></Button>} />
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-white/10 text-zinc-400">
-            <th className="p-2">Nombre</th><th className="p-2">Familia</th><th className="p-2" />
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((c) => (
-            <tr key={c.id} className="border-b border-white/5">
-              <td className="p-2">{c.name}</td>
-              <td className="p-2">{c.familyName}</td>
-              <td className="p-2">
-                <Button size="sm" variant="outline" asChild>
-                  <Link href={`/admin/categories/${c.id}/edit`}>Editar</Link>
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <PageHeader
+        title="Categorías"
+        action={
+          <Button asChild className="bg-violet-600 hover:bg-violet-500">
+            <Link href="/admin/categories/new">+ Crear categoría</Link>
+          </Button>
+        }
+      />
+      <AdminDataTable
+        data={table.data}
+        tableConfig={CATEGORY_TABLE_CONFIG}
+        loading={table.isLoading}
+        paging={table.paging}
+        sort={table.sort}
+        filters={table.filters}
+        onSort={table.onSort}
+        onPageChange={table.onPageChange}
+        onFilterChange={table.onFilterChange}
+        onRowAction={(actionId, row) => {
+          if (actionId === 'delete') del.mutate(row.id);
+        }}
+      />
     </div>
   );
 }

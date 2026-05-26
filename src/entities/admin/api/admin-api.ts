@@ -1,12 +1,18 @@
 import { env } from '@/shared/config/env';
 import { api } from '@/shared/api/client';
 import type { OrderDetailDto, PagedOrdersDto } from '@/entities/order/model/types';
+import { adminTableParamsToQueryString } from '@/shared/lib/admin-table-url';
+import type { AdminTableQueryParams } from '@/shared/lib/admin-table-url';
 import type {
   CategoryAdminDto,
   CoverAdminDto,
   PagedCoversAdminDto,
   DriverAdminDto,
   FamilyAdminDto,
+  PagedCategoriesAdminDto,
+  PagedFamiliesAdminDto,
+  PagedSubcategoriesAdminDto,
+  SubcategoryAdminRowDto,
   PagedUsersAdminDto,
   UserAdminDto,
   InventoryDto,
@@ -68,6 +74,12 @@ export const adminApi = {
 
   // Catalog
   listFamilies: () => api<FamilyAdminDto[]>('/admin/catalog/families'),
+  listFamiliesPaged: (params: AdminTableQueryParams) =>
+    api<PagedFamiliesAdminDto>(`/admin/catalog/families/paged?${adminTableParamsToQueryString(params)}`),
+  listCategoriesPaged: (params: AdminTableQueryParams) =>
+    api<PagedCategoriesAdminDto>(`/admin/catalog/categories/paged?${adminTableParamsToQueryString(params)}`),
+  listSubcategoriesPaged: (params: AdminTableQueryParams) =>
+    api<PagedSubcategoriesAdminDto>(`/admin/catalog/subcategories/paged?${adminTableParamsToQueryString(params)}`),
   saveFamily: (body: unknown, id?: string) =>
     id
       ? api<FamilyAdminDto>(`/admin/catalog/families/${id}`, { method: 'PUT', body: JSON.stringify(body) })

@@ -1,3 +1,10 @@
+export interface PagedAdminResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface FamilyAdminDto {
   id: string;
   name: string;
@@ -5,6 +12,33 @@ export interface FamilyAdminDto {
   sortOrder: number;
   isActive: boolean;
 }
+
+export type PagedFamiliesAdminDto = PagedAdminResult<FamilyAdminDto>;
+
+export interface CategoryAdminRowDto {
+  id: string;
+  familyId: string;
+  name: string;
+  slug: string;
+  sortOrder: number;
+  isActive: boolean;
+  familyName: string;
+}
+
+export type PagedCategoriesAdminDto = PagedAdminResult<CategoryAdminRowDto>;
+
+export interface SubcategoryAdminRowDto {
+  id: string;
+  categoryId: string;
+  name: string;
+  slug: string;
+  sortOrder: number;
+  isActive: boolean;
+  categoryName: string;
+  familyName: string;
+}
+
+export type PagedSubcategoriesAdminDto = PagedAdminResult<SubcategoryAdminRowDto>;
 
 export interface CategoryAdminDto {
   id: string;
